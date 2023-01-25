@@ -10,8 +10,8 @@ RUN mkdir -p sample_s3
 
 ADD src/sample_s3 sample_s3
 COPY setup.py .
-COPY dagster.yaml .
-COPY dagster_cloud.yaml .
-COPY workspace.yaml .
+#COPY dagster.yaml .
+#COPY dagster_cloud.yaml .
+#COPY workspace.yaml .
 
 RUN pip install -e .

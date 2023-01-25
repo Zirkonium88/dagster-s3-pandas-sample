@@ -28,7 +28,7 @@ def build_s3_resource() -> boto3.resource:
     try:
         response = sts.assume_role(
             RoleArn=role_arn,
-            RoleSessionName="hdicrm-phz-manager",
+            RoleSessionName="dagster-s3-sample",
         )
         access_key = response["Credentials"]["AccessKeyId"]
         secret_access_key = response["Credentials"]["SecretAccessKey"]
