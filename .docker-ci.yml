@@ -28,7 +28,7 @@ variables:
 
 code-location-deployment:
   stage: .post
-  image: $CDK_IMAGE:DOCKER_TAG
+  image: $CDK_IMAGE:$DOCKER_TAG
   tags:
     - auto
   before_script:
