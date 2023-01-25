@@ -6,6 +6,9 @@ variables:
 
 code-location-deployment:
   stage: .post
+  variables:
+    JOB_CF_ENVIRONMENT: DEV
+    AWS_ACCOUNT_ID: $AWS_ACCOUNT_ID_DEV
   image: $CDK_IMAGE:$DOCKER_TAG
   tags:
     - auto
