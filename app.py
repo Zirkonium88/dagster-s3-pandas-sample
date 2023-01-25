@@ -12,7 +12,6 @@ tags = {
     "NameTeam": "MDP",
     "Expiry": "never",  # Can be never for master, dmz or release branches
     "DeploymentBranch": os.getenv("CI_COMMIT_BRANCH"),
-    "CommitID": os.getenv("CI_COMMIT_SHORT_SHA"),
     "StackOwnerPersonalID": "063209"  # HDI Personal ID
 }
 
