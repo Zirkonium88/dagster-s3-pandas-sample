@@ -3,7 +3,7 @@ variables:
   BUCKET_NAME_PARAM: /dagster/s3-sample/BucketName
   DS_TARGET_IMAGE_NAME: dagster-s3-sample
   CODE_LOCATION_VERSION: 0.0.1
-  DOCKER_SRC_DIR: src/dasgster
+  DOCKER_SRC_DIR: src/dagster
 
 code-location-deployment:
   stage: .post
