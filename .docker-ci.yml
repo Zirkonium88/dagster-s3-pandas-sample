@@ -18,6 +18,8 @@ code-location-deployment:
     - !reference [.scripts, aws, setup]
     - !reference [.scripts, aws, credentials]
   script:
+    - pwd
+    - ls -a
     - echo "############################"
     - echo "### Setting Environment Parameter"
     - echo "############################"
