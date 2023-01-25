@@ -25,6 +25,17 @@ class SampleStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,
             alias="Keys/DagsterSample",
         )
+        cfn_key = data_bucket_key.node.default_child
+        cfn_key.cfn_options.metadata = {
+            "cfn_lint": {
+                "rules_to_suppress": [
+                    {"id": "EKMSSettings"},
+                    {
+                        "reason": "KMS keys will be deleted only in EW stages"
+                    },
+                ]
+            }
+        }
 
         data_bucket = s3.Bucket(
             self,
