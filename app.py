@@ -3,7 +3,7 @@ import os
 
 import aws_cdk as cdk
 from cicd import cicdflow
-from dagster_s3_sample.sample_stack import SampleStack
+from dagster_s3_sample.s3_sample import SampleStack
 
 tags = {
     "Name": "dagster-s3-sample",

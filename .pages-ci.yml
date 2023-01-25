@@ -1,0 +1,13 @@
+image: hdi-registry.we.decodeinsurance.de/mdp-hd/cdk:release-2-4-0
+
+pages:
+  stage: .pre
+  script:
+    - pip install pdoc3
+    - pwd
+    - ls -a
+    - pdoc --html ./dagster_s3_sample/s3_sample.py -o public
+    - mv ./public/s3_sample.html ./public/index.html
+  artifacts:
+    paths:
+      - public

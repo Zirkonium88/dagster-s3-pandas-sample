@@ -2,6 +2,8 @@ include:
   - project: "mdp/cicd"
     ref: release/2.4.0
     file: "aws.cdk.gitlab-ci.yml"
+  - local: ".pages-ci.yml"
+  - local: ".docker-ci.yml"
 
 variables:
   PATH_TO_APP_FOLDER: .
@@ -11,6 +13,7 @@ variables:
   AWS_ACCOUNT_ID_UAT: 735126378691
   AWS_ACCOUNT_ID_PROD: 614602502032
   AWS_ACCOUNT_ID_AUTO: 165022782232
-  CDK_IMAGE: registry.we.decodeinsurance.de/mdp/cicd/cdk
-  RUN_CODE_QUALITY: "true"
-  RUN_UNITTESTS: "true"
+  CDK_IMAGE: hdi-registry.we.decodeinsurance.de/mdp-hd/cdk
+  DOCKER_TAG: release-2-4-0
+  RUN_CODE_QUALITY: "false"
+  RUN_UNITTESTS: "false"

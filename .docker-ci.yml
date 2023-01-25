@@ -1,0 +1,52 @@
+variables:
+  IAM_ROLE_PARAM: /dagster/s3-sample/RoleArn
+  BUCKET_NAME_PARAM: /dagster/s3-sample/BucketName
+  DS_TARGET_IMAGE_NAME: dagster-s3-sample
+  CODE_LOCATION_VERSION: 0.0.1
+
+.scripts:
+  proxy:
+    - export http_proxy=$PROXY
+    - export https_proxy=$PROXY
+    - export no_proxy=$NO_PROXY
+  credentials:
+    aws:
+      - export AWS_DEFAULT_REGION=$AWS_REGION
+      - export AWS_STS_REGIONAL_ENDPOINTS=regional
+      - export AWS_PIPELINE_ROLE=$DEPLOYMENT_ROLE
+      - |
+        if [[ -z "$AWS_ACCOUNT_ID" ]]; then
+          echo "$AWS_ACCOUNT_ID for $JOB_CF_ENVIRONMENT is empty/not set. You need to specify the deployment account ID within .gitlab-ci.yml"
+          exit 1
+        fi
+      - KST=$(aws sts assume-role --endpoint-url https://sts.$AWS_REGION.amazonaws.com --role-arn arn:aws:iam::$AWS_ACCOUNT_ID:role/$AWS_PIPELINE_ROLE --role-session-name ${CI_JOB_NAME} --duration-seconds ${TIME_DURATION})
+      - export AWS_ACCESS_KEY_ID=$(echo $KST | jq -r .Credentials.AccessKeyId)
+      - export AWS_SECRET_ACCESS_KEY=$(echo $KST | jq -r .Credentials.SecretAccessKey)
+      - export AWS_SESSION_TOKEN=$(echo $KST | jq -r .Credentials.SessionToken)
+    harbor:
+      - echo $HARBOR_USER_PWD | docker login --username $HARBOR_USER --password-stdin $HARBOR_URL/
+
+code-location-deployment:
+  stage: .post
+  image: $CDK_IMAGE:DOCKER_TAG
+  tags:
+    - auto
+  before_script:
+    - !reference [ .scripts, proxy ]
+    - !reference [ .scripts, credentials, harbor ]
+  script:
+    - echo "############################"
+    - echo "### Setting Environment Parameter"
+    - echo "############################"
+    - IAM_ROLE_ARN=$(aws ssm get-parameter --name $IAM_ROLE_PARAM --query "Parameter.Value" --output text)
+    - export IAM_ROLE_ARN=$IAM_ROLE_ARN
+    - S3_BUCKET=$(aws ssm get-parameter --name $BUCKET_NAME_PARAM --query "Parameter.Value" --output text)
+    - export S3_BUCKET=$S3_BUCKET
+    - echo "############################"
+    - echo "### Starting Docker build   "
+    - echo "############################"
+    - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CI_COMMIT_REF_SLUG $DOCKER_SRC_DIR --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
+    - docker push $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION
+    - echo "############################"
+    - echo "### Finished Docker build   "
+    - echo "############################"

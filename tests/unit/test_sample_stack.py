@@ -1,7 +1,7 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
 
-from dagster_s3_sample.sample_stack import SampleStack
+from dagster_s3_sample.s3_sample import SampleStack
 
 # example tests. To run these tests, uncomment this file along with the example
 # resource in dagster_s3_sample/sample_stack.py
