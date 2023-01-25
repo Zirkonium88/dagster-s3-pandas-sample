@@ -6,9 +6,9 @@ RUN apt-get update && apt-get install -y git
 
 RUN apt install -y default-jre
 
-RUN mkdir -p sample_s3/
+RUN mkdir -p sample_s3
 
-COPY src/sample_s3/ sample_s3/
+ADD src/sample_s3 sample_s3
 COPY setup.py .
 COPY dagster.yaml .
 COPY dagster_cloud.yaml .
