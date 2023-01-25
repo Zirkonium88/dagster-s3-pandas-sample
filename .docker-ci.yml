@@ -31,7 +31,7 @@ code-location-deployment:
     - echo "### Starting Docker build   "
     - echo "############################"
     - echo $HARBOR_USER_PWD | docker login --username $HARBOR_USER --password-stdin $HARBOR_URL/
-    - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CI_COMMIT_REF_SLUG $DOCKER_SRC_DIR --build-arg path=$(pwd) --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
+    - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CI_COMMIT_REF_SLUG $DOCKER_SRC_DIR --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
     - docker push $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION
     - echo "############################"
     - echo "### Finished Docker build   "
