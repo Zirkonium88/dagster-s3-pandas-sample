@@ -4,7 +4,6 @@ variables:
   DS_TARGET_IMAGE_NAME: dagster-s3-sample
   CODE_LOCATION_VERSION: 0.0.1
 
-
 code-location-deployment:
   stage: .post
   image: $CDK_IMAGE:$DOCKER_TAG
@@ -12,8 +11,8 @@ code-location-deployment:
     - auto
   before_script:
     - !reference [ .scripts, proxy ]
-    - !reference [ .scripts, credentials, aws ]
-    - !reference [ .scripts, credentials, harbor ]
+    - !reference [.scripts, aws, setup]
+    - !reference [.scripts, aws, credentials]
   script:
     - echo "############################"
     - echo "### Setting Environment Parameter"
@@ -25,6 +24,7 @@ code-location-deployment:
     - echo "############################"
     - echo "### Starting Docker build   "
     - echo "############################"
+    - echo $HARBOR_USER_PWD | docker login --username $HARBOR_USER --password-stdin $HARBOR_URL/
     - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CI_COMMIT_REF_SLUG $DOCKER_SRC_DIR --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
     - docker push $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION
     - echo "############################"
