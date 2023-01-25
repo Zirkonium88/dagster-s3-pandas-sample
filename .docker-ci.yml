@@ -36,6 +36,7 @@ code-location-deployment:
     - echo "############################"
     - echo "### Finished Docker build   "
     - echo "############################"
-#    - pip install dagster-cloud
-#    - dagster-cloud --install-completion
-#    - dagster-cloud workspace add-location s3_sample --image $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION --package-name s3_sample
+    - pip install dagster-cloud
+    - dagster-cloud --install-completion
+    - dagster-cloud config set-deployment prod --organization hdi --api-token agent:hdi:4b47eb7501974f5980345d7d03a38643
+    - dagster-cloud workspace add-location s3_sample --image $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION --package-name s3_sample
