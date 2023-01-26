@@ -2,7 +2,7 @@ variables:
   IAM_ROLE_PARAM: /dagster/s3-sample/RoleArn
   BUCKET_NAME_PARAM: /dagster/s3-sample/BucketName
   DS_TARGET_IMAGE_NAME: dagster-s3-sample
-  CODE_LOCATION_VERSION: 0.0.1
+  CODE_LOCATION_VERSION: 0.0.2
   DOCKER_SRC_DIR: src/Docker
 
 code-location-deployment:

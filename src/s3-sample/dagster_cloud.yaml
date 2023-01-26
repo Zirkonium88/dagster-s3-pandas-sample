@@ -1,13 +1,9 @@
 locations:
-  - location_name: sample_s3
+  - location_name: s3_bucket_sample
     code_source:
-      package_name: sample_s3
+      package_name: s3_bucket_sample
     container_context:
       ecs:
         env_vars:
-          - IAM_ROLE_ARN=${IAM_ROLE_ARN}
-          - S3_BUCKET=${S3_BUCKET}
-          - AWS_STS_REGIONAL_ENDPOINTS=regional
-          - AWS_DEFAULT_REGION=eu-central-1
           - LOG_LEVEL=INFO
-    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.1
+    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.2
