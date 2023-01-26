@@ -57,11 +57,11 @@ def create_df() -> pd.DataFrame:
     return df
 
 @asset
-def upload_df(df=create_df) -> None:
+def upload_df(create_df) -> None:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
-        df: function, to create a pd.DataFrame
+        create_df: function, to create a pd.DataFrame
 
     Returns:
 
@@ -73,7 +73,7 @@ def upload_df(df=create_df) -> None:
         raise
 
     csv_buffer = StringIO()
-    df.to_csv(csv_buffer)
+    create_df.to_csv(csv_buffer)
 
     s3=build_s3_resource()
 

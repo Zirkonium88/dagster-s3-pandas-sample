@@ -7,5 +7,5 @@ locations:
         env_vars:
           - IAM_ROLE_ARN=${IAM_ROLE_ARN}
           - S3_BUCKET=${S3_BUCKET}
-          - LOG_LEVEL="INFO"
+          - LOG_LEVEL=INFO
     image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.1
