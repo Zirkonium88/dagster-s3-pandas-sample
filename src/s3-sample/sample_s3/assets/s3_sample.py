@@ -4,6 +4,7 @@ import boto3
 import pandas as pd
 from dagster import asset
 import logging
+import time
 
 log_level = os.environ.get("LOG_LEVEL", os.environ["LOG_LEVEL"])
 logging.root.setLevel(logging.getLevelName(log_level))
@@ -61,15 +62,17 @@ def upload_df(create_df) -> None:
         logger.exception(e)
         raise
 
-    df = create_df()
     response=assume_role()
     access_key = response["Credentials"]["AccessKeyId"]
     secret_access_key = response["Credentials"]["SecretAccessKey"]
     session_token = response["Credentials"]["SessionToken"]
 
     try:
-        df.to_csv(
-            f"s3://{bucket_name}/df.csv",
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+
+        create_df.to_csv(
+            f"s3://{bucket_name}/{current_time}-df.csv",
             index=False,
             storage_options={
                 "key": access_key,
