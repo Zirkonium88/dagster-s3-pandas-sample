@@ -75,7 +75,7 @@ def upload_dataframe(create_dataframe) -> None:
         raise
 
     csv_buffer = StringIO()
-    create_df.to_csv(csv_buffer)
+    create_dataframe.to_csv(csv_buffer)
 
     s3=build_s3_resource()
 

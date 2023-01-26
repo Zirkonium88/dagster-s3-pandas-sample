@@ -9,6 +9,7 @@ if __name__ == "__main__":
             "dagster",
             "pandas",
             "numpy",
+            "s3fs",
             "dagster-aws",
             "dagster-cloud",
             "dagstermill",
