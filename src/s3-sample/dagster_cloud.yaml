@@ -1,5 +1,5 @@
 locations:
-  - location_name: dagster-s3-sample
+  - location_name: sample_s3
     code_source:
       package_name: sample_s3
     container_context:
@@ -8,6 +8,4 @@ locations:
           - IAM_ROLE_ARN=${IAM_ROLE_ARN}
           - S3_BUCKET=${S3_BUCKET}
           - LOG_LEVEL="INFO"
-    build:
-      directory: ./
-      registry: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.1
+    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.1

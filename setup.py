@@ -4,7 +4,7 @@ if __name__ == "__main__":
     setup(
         name="sample_s3",
         packages=find_packages(exclude=["sample_s3_tests"]),
-        package_data={"src": ["sample_s3/*"]},
+        package_data={"sample_s3": ["sample_s3/*"]},
         install_requires=[
             "dagster",
             "pandas",
