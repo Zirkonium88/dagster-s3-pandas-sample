@@ -6,7 +6,7 @@ ARG s3_bucket_name
 ENV IAM_ROLE_ARN=$iam_role_arn
 ENV S3_BUCKET=$s3_bucket_name
 
-COPY docker-client-config.json /root/.docker/config.json
+COPY src/Docker/docker-client-config.json /root/.docker/config.json
 
 WORKDIR /opt/dagster/app
 
