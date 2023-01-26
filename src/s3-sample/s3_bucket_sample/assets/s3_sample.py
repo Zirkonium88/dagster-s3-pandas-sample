@@ -59,7 +59,7 @@ def create_dataframe() -> pd.DataFrame:
     return df
 
 @asset
-def upload_dataframe(create_df) -> None:
+def upload_dataframe(create_dataframe) -> None:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
