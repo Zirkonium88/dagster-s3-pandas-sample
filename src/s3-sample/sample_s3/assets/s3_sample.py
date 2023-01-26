@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import boto3
-from io import StringIO
 import pandas as pd
 from dagster import asset
 import logging
@@ -11,10 +10,10 @@ logging.root.setLevel(logging.getLevelName(log_level))
 logger = logging.getLogger(__name__)
 
 
-def build_s3_resource() -> boto3.resource:
-    """Create a S3 boto3 resource object.
+def assume_role() -> dict:
+    """Assume am IAM role.
 
-    Returns: s3_resource, boto3.resource object for S3
+    Returns: dict with AWS tokens
 
     """
 
@@ -30,21 +29,11 @@ def build_s3_resource() -> boto3.resource:
             RoleArn=role_arn,
             RoleSessionName="dagster-s3-sample",
         )
-        access_key = response["Credentials"]["AccessKeyId"]
-        secret_access_key = response["Credentials"]["SecretAccessKey"]
-        session_token = response["Credentials"]["SessionToken"]
     except Exception as e:
         logger.exception(e)
         raise
 
-    s3_resource = boto3.resource(
-        service_name="s3",
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_access_key,
-        aws_session_token=session_token
-    )
-
-    return s3_resource
+    return response
 
 @asset
 def create_df() -> pd.DataFrame:
@@ -72,13 +61,22 @@ def upload_df(create_df) -> None:
         logger.exception(e)
         raise
 
-    csv_buffer = StringIO()
-    create_df.to_csv(csv_buffer)
-
-    s3=build_s3_resource()
+    df = create_df()
+    response=assume_role()
+    access_key = response["Credentials"]["AccessKeyId"]
+    secret_access_key = response["Credentials"]["SecretAccessKey"]
+    session_token = response["Credentials"]["SessionToken"]
 
     try:
-        s3.Object(bucket_name, 'df.csv').put(Body=csv_buffer.getvalue())
+        df.to_csv(
+            f"s3://{bucket_name}/df.csv",
+            index=False,
+            storage_options={
+                "key": access_key,
+                "secret": secret_access_key,
+                "token": session_token,
+            },
+        )
     except Exception as e:
         logger.exception(e)
         raise
