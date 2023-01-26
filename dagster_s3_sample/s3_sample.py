@@ -74,7 +74,7 @@ class SampleStack(Stack):
         code_location_role = iam.Role(
             self,
             id="dagster-code-location-role",
-            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com")
+            assumed_by=iam.AccountRootPrincipal()
         )
 
         bucket.grant_read_write(code_location_role)
