@@ -9,7 +9,7 @@ from dagster import (
 from . import assets
 
 daily_refresh_schedule = ScheduleDefinition(
-    job=define_asset_job(name="s3sample"), cron_schedule="*/1 * * * *"
+    job=define_asset_job(name="s3sample"), cron_schedule="*/5 * * * *"
 )
 
 
