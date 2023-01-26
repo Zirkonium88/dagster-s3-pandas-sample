@@ -48,17 +48,18 @@ def build_s3_resource() -> boto3.resource:
     return s3_resource
 
 @asset
-def create_df() -> pd.DataFrame:
+def create_dataframe() -> pd.DataFrame:
     """Create a pd.DataFrame with random values.
 
     Returns: df, pd.DataFrame holding the random values
 
     """
     df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
+    logger.info(df.head())
     return df
 
 @asset
-def upload_df(create_df) -> None:
+def upload_dataframe(create_df) -> None:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
