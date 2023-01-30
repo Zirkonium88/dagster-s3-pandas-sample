@@ -3,7 +3,7 @@ import os
 import boto3
 from io import StringIO
 import pandas as pd
-from dagster import job, op, Field, Int, repository, ScheduleDefinition
+from dagster import op, Field, Int
 import logging
 import time
 from botocore.exceptions import ClientError
@@ -15,7 +15,7 @@ def build_s3_client(sts) -> boto3.client:
     """Create a S3 boto3 resource object.
     Args:
         sts: sts boto3 client
-    Returns: s3_resource, boto3.resource object for S3
+    Returns: s3_client, boto3.client object for S3
 
     """
     try:
@@ -75,6 +75,7 @@ def create_dataframe(context) -> pd.DataFrame:
     return df
 
 
+@op
 def upload_dataframe(created_dataframe, s3_client) -> bool:
     """Upload a pd.DataFrame as CSV to S3.
 
@@ -104,45 +105,3 @@ def upload_dataframe(created_dataframe, s3_client) -> bool:
 
     return True
 
-
-@job(
-    config={
-        "ops": {
-            "create_dataframe": {
-                "config": {
-                    "random_min_size": 0,
-                    "random_max_size": 100,
-                    "n_rows": 0,
-                    "n_cols": 4,
-                    "col_names": ["ABCD"]
-                }
-            }
-        }
-    }
-)
-def load_s3() -> None:
-    """Job definition for ops pats.
-
-    Returns: message: str, success code
-
-    """
-    logging.info("Starting S3 upload job ...")
-    try:
-        upload_dataframe(
-            create_dataframe(),
-            s3_client=build_s3_client(sts)
-        )
-    except Exception as e:
-        logging.error(e)
-    logging.info("Finished S3 upload job ...")
-
-
-load_s3_schedule = ScheduleDefinition(job=load_s3, cron_schedule="0 0 * * *")
-
-
-@repository
-def s3_sample_repository():
-    return [
-        load_s3_schedule,
-        load_s3,
-    ]

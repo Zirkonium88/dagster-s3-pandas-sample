@@ -8,7 +8,6 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-
 @pytest.fixture()
 def environment():
     os.environ = {
@@ -18,11 +17,12 @@ def environment():
     }
 
 
+
 class TestS3Sample():
 
     def test_create_dataframe(self):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import create_dataframe as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import create_dataframe as uat
         context = build_op_context(
             config={
                 "random_min_size": 0,
@@ -43,7 +43,7 @@ class TestS3Sample():
 
     def test_build_s3_client(self, environment):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import build_s3_client as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
         sts = MagicMock()
         s3_client = boto3.client("s3")
         role_arn = os.environ["IAM_ROLE_ARN"]
@@ -62,7 +62,7 @@ class TestS3Sample():
 
     def test_build_s3_client_client_error(self, environment):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import build_s3_client as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
         sts = MagicMock()
         sts.assume_role.side_effect = ClientError(
             error_response={
@@ -82,7 +82,7 @@ class TestS3Sample():
 
     def test_build_s3_client_key_error(self):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import build_s3_client as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
         sts = MagicMock()
         del(os.environ["IAM_ROLE_ARN"])
         # When
@@ -92,12 +92,12 @@ class TestS3Sample():
             )
 
     @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.s3_sample.build_s3_client",
+        "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
     def test_upload_dataframe(self, s3_mock):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import upload_dataframe as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         bucket_name = os.environ["S3_BUCKET"]
         df = pd.DataFrame(
             np.random.randint(
@@ -119,12 +119,12 @@ class TestS3Sample():
         assert response is True
 
     @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.s3_sample.build_s3_client",
+        "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
     def test_upload_dataframe_upload_exception(self, s3_client_mock):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import upload_dataframe as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         s3_client_mock.put_object.side_effect = ClientError(
             error_response={
                 "Error": {
@@ -152,12 +152,12 @@ class TestS3Sample():
             )
 
     @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.s3_sample.build_s3_client",
+        "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
     def test_upload_dataframe_key_error(self, s3_mock):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import upload_dataframe as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         del(os.environ["S3_BUCKET"])
         df = pd.DataFrame(
             np.random.randint(
@@ -177,12 +177,12 @@ class TestS3Sample():
 
 
     @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.s3_sample.upload_dataframe",
+        "src.s3_sample.s3_bucket_sample.jobs.ops.upload_dataframe",
         return_value=True
     )
     def test_load_s3(self, mocked_upload_dataframe):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import load_s3 as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
         df = pd.DataFrame(
             np.random.randint(
                 0,
@@ -213,12 +213,12 @@ class TestS3Sample():
         assert result.success is True
 
     @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.s3_sample.upload_dataframe",
+        "src.s3_sample.s3_bucket_sample.jobs.ops.upload_dataframe",
         return_value=Exception
     )
     def test_load_s3_exception(self, mocked_upload_dataframe):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.s3_sample import load_s3 as uat
+        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
         df = pd.DataFrame(
             np.random.randint(
                 0,
