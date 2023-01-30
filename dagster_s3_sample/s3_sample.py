@@ -55,7 +55,7 @@ class SampleStack(Stack):
         ssm.StringParameter(
             self,
             id="DataBucketSSMOutput",
-            parameter_name=f"/{env_config['name']}/dagster/s3-sample/BucketName",
+            parameter_name=f"/{env_config['name'].lower()}/dagster/s3-sample/BucketName",
             string_value=data_bucket.bucket_name,
         )
 
