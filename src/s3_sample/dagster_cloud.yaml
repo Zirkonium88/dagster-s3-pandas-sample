@@ -6,4 +6,4 @@ locations:
       ecs:
         env_vars:
           - LOG_LEVEL=INFO
-    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.2
+    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.3
