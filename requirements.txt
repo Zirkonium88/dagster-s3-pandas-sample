@@ -15,6 +15,10 @@ pytest-mock
 pyyaml
 requests
 responses
+dagster
 pandas
 numpy
 s3fs
+dagster-aws
+dagster-cloud
+dagstermill
