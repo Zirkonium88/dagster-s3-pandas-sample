@@ -75,7 +75,6 @@ def create_dataframe(context) -> pd.DataFrame:
     return df
 
 
-@op()
 def upload_dataframe(created_dataframe, s3_client) -> bool:
     """Upload a pd.DataFrame as CSV to S3.
 
@@ -139,6 +138,7 @@ def load_s3() -> None:
 
 
 load_s3_schedule = ScheduleDefinition(job=load_s3, cron_schedule="0 0 * * *")
+
 
 @repository
 def s3_sample_repository():
