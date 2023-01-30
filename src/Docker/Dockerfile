@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y git
 
 RUN apt install -y default-jre
 
-ADD src/s3-sample/ .
+ADD src/s3_sample/ .
 
 COPY setup.py .
 

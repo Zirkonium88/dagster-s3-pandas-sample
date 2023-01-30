@@ -16,4 +16,4 @@ variables:
   CDK_IMAGE: hdi-registry.we.decodeinsurance.de/mdp-hd/cdk
   DOCKER_TAG: release-2-4-0
   RUN_CODE_QUALITY: "false"
-  RUN_UNITTESTS: "false"
+  RUN_UNITTESTS: "true"
