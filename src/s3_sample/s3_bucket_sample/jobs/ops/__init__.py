@@ -3,7 +3,7 @@ import os
 import boto3
 from io import StringIO
 import pandas as pd
-from dagster import op, Field, Int
+from dagster import op, Field, Int, String
 import logging
 import time
 from botocore.exceptions import ClientError
@@ -51,7 +51,6 @@ def build_s3_client(sts) -> boto3.client:
         "random_max_size": Field(Int, is_required=True),
         "n_rows": Field(Int, is_required=True),
         "n_cols": Field(Int, is_required=True),
-        "col_names": Field([str], is_required=False)
     }
 )
 def create_dataframe(context) -> pd.DataFrame:
@@ -63,38 +62,38 @@ def create_dataframe(context) -> pd.DataFrame:
     Return: df, pd.DataFrame holding the random values
 
     """
-    assert context.op_config["n_cols"] == len(context.op_config["col_names"]), f"Error: number of columns {context.op_config['n_cols']} is not equal to length of list of columns {context.op_config['col_names']}"
     df = pd.DataFrame(
         np.random.randint(
             context.op_config["random_min_size"],
             context.op_config["random_max_size"],
             size=(context.op_config["n_rows"], context.op_config["n_cols"])
         ),
-        columns=context.op_config["col_names"]
     )
     return df
 
 
-@op
-def upload_dataframe(created_dataframe, s3_client) -> bool:
+@op(
+    config_schema={
+        "bucket_name": Field(String, is_required=True),
+    }
+)
+def upload_dataframe(context, created_dataframe, s3_client) -> bool:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
+        bucket_name: str, S3 Bucket name
         created_dataframe: function, to create a pd.DataFrame,
         s3_client: s3 boto client
+
     Returns: True, if succeeded
     """
-    try:
-        bucket_name = os.environ["S3_BUCKET"]
-    except KeyError as e:
-        logging.exception(e)
-        raise
 
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
     file_name = f"./{current_time}-df.csv"
     csv_buffer = StringIO()
     created_dataframe.to_csv(csv_buffer)
+    bucket_name = context.op_config["bucket_name"]
 
     try:
         logging.info(f"Uploading file {file_name} to S3 bucket {bucket_name}")

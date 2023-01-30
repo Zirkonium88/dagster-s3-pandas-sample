@@ -23,18 +23,17 @@ class TestS3Sample():
     def test_create_dataframe(self):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import create_dataframe as uat
-        context = build_op_context(
+        test_context = build_op_context(
             config={
                 "random_min_size": 0,
                 "random_max_size": 100,
                 "n_rows": 100,
                 "n_cols": 4,
-                "col_names": list("ABCD")
             }
         )
 
         # When
-        response = uat(context)
+        response = uat(test_context)
 
         # Then
         assert type(response) == pd.DataFrame
@@ -45,7 +44,6 @@ class TestS3Sample():
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
         sts = MagicMock()
-        s3_client = boto3.client("s3")
         role_arn = os.environ["IAM_ROLE_ARN"]
 
         # When
@@ -95,23 +93,29 @@ class TestS3Sample():
         "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
-    def test_upload_dataframe(self, s3_mock):
+    def test_upload_dataframe(self, s3_mock, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         bucket_name = os.environ["S3_BUCKET"]
+        test_context = build_op_context(
+            config={
+                "bucket_name": bucket_name,
+            }
+        )
+
         df = pd.DataFrame(
             np.random.randint(
                 0,
                 100,
                 size=(100, 4)
             ),
-            columns=list("ABCD")
         )
 
         # When
         response = uat(
             created_dataframe=df,
-            s3_client=MagicMock()
+            s3_client=MagicMock(),
+            context=test_context,
         )
 
         # Then
@@ -122,7 +126,7 @@ class TestS3Sample():
         "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
-    def test_upload_dataframe_upload_exception(self, s3_client_mock):
+    def test_upload_dataframe_upload_exception(self, s3_client_mock, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         s3_client_mock.put_object.side_effect = ClientError(
@@ -148,14 +152,15 @@ class TestS3Sample():
         with pytest.raises(Exception):
             uat(
                 created_dataframe=df,
-                s3_client=s3_client_mock
+                s3_client=s3_client_mock,
+                bucket_name=os.environ["S3_BUCKET"]
             )
 
     @mock.patch(
         "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
-    def test_upload_dataframe_key_error(self, s3_mock):
+    def test_upload_dataframe_key_error(self, s3_mock, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         del(os.environ["S3_BUCKET"])
@@ -165,14 +170,14 @@ class TestS3Sample():
                 100,
                 size=(100, 4)
             ),
-            columns=list("ABCD")
         )
 
         # When
         with pytest.raises(KeyError):
             uat(
                 created_dataframe=df,
-                s3_client=MagicMock()
+                s3_client=MagicMock(),
+                bucket_name=os.environ["S3_BUCKET"]
             )
 
 
@@ -180,17 +185,9 @@ class TestS3Sample():
         "src.s3_sample.s3_bucket_sample.jobs.ops.upload_dataframe",
         return_value=True
     )
-    def test_load_s3(self, mocked_upload_dataframe):
+    def test_load_s3(self, mocked_upload_dataframe, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
-        df = pd.DataFrame(
-            np.random.randint(
-                0,
-                100,
-                size=(100, 4)
-            ),
-            columns=list("ABCD")
-        )
 
         # When
         result = uat.execute_in_process(
@@ -202,7 +199,6 @@ class TestS3Sample():
                             "random_max_size": 100,
                             "n_rows": 0,
                             "n_cols": 4,
-                            "col_names": list("ABCD")
                         }
                     }
                 }
@@ -219,14 +215,6 @@ class TestS3Sample():
     def test_load_s3_exception(self, mocked_upload_dataframe):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
-        df = pd.DataFrame(
-            np.random.randint(
-                0,
-                100,
-                size=(100, 4)
-            ),
-            columns=list("ABCD")
-        )
 
         # When
         with pytest.raises(Exception):
@@ -239,7 +227,6 @@ class TestS3Sample():
                                 "random_max_size": 100,
                                 "n_rows": 0,
                                 "n_cols": 4,
-                                "col_names": list("ABCD")
                             }
                         }
                     }
