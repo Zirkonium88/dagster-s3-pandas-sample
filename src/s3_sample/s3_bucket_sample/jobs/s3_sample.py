@@ -3,7 +3,7 @@ import os
 import boto3
 from io import StringIO
 import pandas as pd
-from dagster import job, op, Field, Int
+from dagster import job, op, Field, Int, repository, ScheduleDefinition
 import logging
 import time
 from botocore.exceptions import ClientError
@@ -138,5 +138,11 @@ def load_s3() -> None:
     logging.info("Finished S3 upload job ...")
 
 
-if __name__ == "__main__":
-    load_s3.execute_in_process() # pragma: no cover
+load_s3_schedule = ScheduleDefinition(job=load_s3, cron_schedule="0 0 * * *")
+
+@repository
+def s3_sample_repository():
+    return [
+        load_s3_schedule,
+        load_s3,
+    ]
