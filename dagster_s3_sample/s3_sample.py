@@ -11,7 +11,7 @@ from constructs import Construct
 class SampleStack(Stack):
     """Defines an architecture to run Dagster s3 example and it's dependencies."""
 
-    def define_s3_bucket(self) -> dict:
+    def define_s3_bucket(self, env_config:dict) -> dict:
         """Create S3 bucket for dagster-s3 sample.
 
         Returns: dict, holding the s3 Bucket and KMS Key construct.
@@ -55,7 +55,7 @@ class SampleStack(Stack):
         ssm.StringParameter(
             self,
             id="DataBucketSSMOutput",
-            parameter_name="/dagster/s3-sample/BucketName",
+            parameter_name=f"/{env_config['name'].lower()}/dagster/s3-sample/BucketName",
             string_value=data_bucket.bucket_name,
         )
 
@@ -64,7 +64,7 @@ class SampleStack(Stack):
             "BucketKey": data_bucket_key,
         }
 
-    def define_iam_roles(self, bucket: s3.IBucket, key: kms.IKey) -> None:
+    def define_iam_roles(self, bucket: s3.IBucket, key: kms.IKey, env_config:dict) -> None:
         """Create IAM Role For dagster Code location.
 
         Returns: dict, holding both IAM Roles as iam.IRole
@@ -83,7 +83,7 @@ class SampleStack(Stack):
         ssm.StringParameter(
             self,
             id="IAMRoleSSMOutput",
-            parameter_name="/dagster/s3-sample/RoleArn",
+            parameter_name=f"/{env_config['name'].lower()}/dagster/s3-sample/RoleArn",
             string_value=code_location_role.role_arn,
         )
 
@@ -98,9 +98,10 @@ class SampleStack(Stack):
         :param kwargs: additional arguments to define the stack
         """
         super().__init__(scope, construct_id, **kwargs)
-        data_response = self.define_s3_bucket()
+        data_response = self.define_s3_bucket(env_config=env_config)
 
         self.define_iam_roles(
+            env_config=env_config,
             bucket=data_response["Bucket"],
             key=data_response["BucketKey"],
         )

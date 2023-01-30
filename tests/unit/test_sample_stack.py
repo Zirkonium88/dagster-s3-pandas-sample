@@ -19,7 +19,6 @@ env = core.Environment(
 app = core.App()
 stack = SampleStack(app, "dagster-s3-sample", env=env, env_config=env_config)
 template = assertions.Template.from_stack(stack)
-template = assertions.Template.from_stack(stack)
 
 
 class TestSampleClass:
@@ -30,3 +29,6 @@ class TestSampleClass:
     def test_s3_buckets_created(self, template=template):
         template.resource_count_is("AWS::S3::Bucket", 1)
         template.resource_count_is("AWS::KMS::Key", 1)
+
+    def test_parameter_created(self, template=template):
+        template.resource_count_is("AWS::SSM::Parameter", 2)
