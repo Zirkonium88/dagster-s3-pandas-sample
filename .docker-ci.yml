@@ -1,6 +1,6 @@
 variables:
-  IAM_ROLE_PARAM: /dagster/s3-sample/RoleArn
-  BUCKET_NAME_PARAM: //dagster/s3-sample/BucketName
+  IAM_ROLE_PARAM: /feat300123//dagster/s3-sample/RoleArn
+  BUCKET_NAME_PARAM: /feat300123//dagster/s3-sample/BucketName
   DS_TARGET_IMAGE_NAME: dagster-s3-sample
   CODE_LOCATION_VERSION: 0.0.3
   DOCKER_SRC_DIR: src/Docker
