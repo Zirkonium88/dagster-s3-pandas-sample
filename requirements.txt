@@ -15,3 +15,6 @@ pytest-mock
 pyyaml
 requests
 responses
+pandas
+numpy
+s3fs
