@@ -3,13 +3,30 @@ import aws_cdk.assertions as assertions
 
 from dagster_s3_sample.s3_sample import SampleStack
 
-# example tests. To run these tests, uncomment this file along with the example
-# resource in dagster_s3_sample/sample_stack.py
-def test_sqs_queue_created():
-    app = core.App()
-    stack = SampleStack(app, "dagster-s3-sample")
-    template = assertions.Template.from_stack(stack)
+env_config = {
+    "is_main_env_in_account": "True",
+    "account": "12345678901",
+    "region": "eu-central-1",
+    "name": "SI3",
+    "team": "MDP",
+}
 
-#     template.has_resource_properties("AWS::SQS::Queue", {
-#         "VisibilityTimeout": 300
-#     })
+env = core.Environment(
+    account=env_config["account"],
+    region=env_config["region"],
+)
+
+app = core.App()
+stack = SampleStack(app, "dagster-s3-sample", env=env, env_config=env_config)
+template = assertions.Template.from_stack(stack)
+template = assertions.Template.from_stack(stack)
+
+
+class TestSampleClass:
+
+    def test_iam_roles_created(self, template=template):
+        template.resource_count_is("AWS::IAM::Role", 1)
+
+    def test_s3_buckets_created(self, template=template):
+        template.resource_count_is("AWS::S3::Bucket", 1)
+        template.resource_count_is("AWS::KMS::Key", 1)

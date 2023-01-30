@@ -11,7 +11,7 @@ from botocore.exceptions import ClientError
 sts = boto3.client("sts")
 
 
-def build_s3_client(sts) -> boto3.resource:
+def build_s3_client(sts) -> boto3.client:
     """Create a S3 boto3 resource object.
     Args:
         sts: sts boto3 client
@@ -121,7 +121,7 @@ def upload_dataframe(created_dataframe, s3_client) -> bool:
         }
     }
 )
-def load_s3():
+def load_s3() -> None:
     """Job definition for ops pats.
 
     Returns: message: str, success code
