@@ -23,7 +23,7 @@ class SampleStack(Stack):
             enabled=True,
             enable_key_rotation=True,
             removal_policy=RemovalPolicy.DESTROY,
-            alias="Keys/DagsterSample",
+            alias=f"Keys/{env_config['name']}/DagsterSample",
         )
         cfn_key = data_bucket_key.node.default_child
         cfn_key.cfn_options.metadata = {
