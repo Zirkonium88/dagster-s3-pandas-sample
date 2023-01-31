@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import boto3
 from io import StringIO
 import pandas as pd
@@ -11,15 +10,17 @@ from botocore.exceptions import ClientError
 sts = boto3.client("sts")
 
 
-def build_s3_client(sts, role_arn) -> boto3.client:
+def build_s3_client(sts_client: boto3.client, role_arn: str) -> boto3.client:
     """Create a S3 boto3 resource object.
     Args:
-        sts: sts boto3 client
+        sts_client: sts boto3 client
+        role_arn: str, IAM role ARN
+
     Returns: s3_client, boto3.client object for S3
 
     """
     try:
-        response = sts.assume_role(
+        response = sts_client.assume_role(
             RoleArn=role_arn,
             RoleSessionName="dagster-s3-sample",
         )
@@ -41,10 +42,7 @@ def build_s3_client(sts, role_arn) -> boto3.client:
 
 
 @op(
-    description="""
-        Dieser Op-Schrit zerugt anhand von Inputparametern (random_min_size: kleinste Zahl, random_max_size: größte 
-        Zahl, n_rows: Anzahl der Reihen im pd.Dataframe, n_cols: Anzahl der Spalte im pd.Dataframe) ein pd.Dataframe.
-    """,
+    description="Dieser Op-Schritt erzeugt anhand von Parameter ein pd.Dataframe.",
     config_schema={
         "random_min_size": Field(Int, is_required=True),
         "random_max_size": Field(Int, is_required=True),
@@ -62,6 +60,11 @@ def create_dataframe(context) -> pd.DataFrame:
     Return: df, pd.DataFrame holding the random values
 
     """
+    context.log.info(f"""
+        Creating random pd.Dataframe with parameters: random_min_size {context.op_config["random_min_size"]}, 
+        random_max_size {context.op_config["random_max_size"]}, n_rows {context.op_config["n_rows"]}, 
+        n_cols {context.op_config["n_cols"]}
+    """)
     df = pd.DataFrame(
         np.random.randint(
             context.op_config["random_min_size"],
@@ -69,18 +72,19 @@ def create_dataframe(context) -> pd.DataFrame:
             size=(context.op_config["n_rows"], context.op_config["n_cols"])
         ),
     )
+    context.log.info("Created random pd.Dataframe")
     return df
 
 
 @op(
-    description="Dieser Op-Schrit lädt das erzeugte pd.DataFrame mittels einer Rolle nach S3 (build_s3_client)",
+    description="Dieser Op-Schritt lädt das erzeugte pd.DataFrame mittels einer Rolle nach S3 (build_s3_client)",
     config_schema={
         "bucket_name": Field(String, is_required=True),
         "role_arn": Field(String, is_required=True),
     },
     ins={"created_dataframe": In()}
 )
-def upload_dataframe(context, created_dataframe) -> bool:
+def upload_dataframe(context, created_dataframe: pd.DataFrame) -> bool:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
@@ -98,13 +102,12 @@ def upload_dataframe(context, created_dataframe) -> bool:
     created_dataframe.to_csv(csv_buffer)
     bucket_name = context.op_config["bucket_name"]
     role_arn = context.op_config["role_arn"]
-    s3_client = build_s3_client(sts=sts, role_arn=role_arn)
+    s3_client = build_s3_client(sts_client=sts, role_arn=role_arn)
     try:
-        logging.info(f"Uploading file {file_name} to S3 bucket {bucket_name}")
-        s3_client.put_object(Bucket=bucket_name, Body=csv_buffer.getvalue(), Key=f"s3://{bucket_name}/{file_name}")
+        context.log.info(f"Uploading file {file_name} to S3 bucket {bucket_name}")
+        s3_client.put_object(Bucket=bucket_name, Body=csv_buffer.getvalue(), Key=file_name)
     except ClientError as e:
-        logging.exception(e)
+        context.log.error(e)
         raise
 
     return True
-

@@ -45,7 +45,7 @@ class TestS3Sample():
 
         # When
         response = uat(
-            sts=sts,
+            sts_client=sts,
             role_arn=role_arn
         )
 
@@ -75,7 +75,7 @@ class TestS3Sample():
         # When
         with pytest.raises(ClientError):
             uat(
-                sts=sts,
+                sts_client=sts,
                 role_arn=role_arn
             )
 
@@ -170,6 +170,7 @@ class TestS3Sample():
                         "upload_dataframe": {
                             "config": {
                                 "bucket_name": os.environ["S3_BUCKET"],
+                                "role_arn": os.environ["IAM_ROLE_ARN"],
                             }
                         }
                     }
