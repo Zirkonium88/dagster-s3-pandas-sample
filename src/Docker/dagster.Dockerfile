@@ -31,15 +31,12 @@ RUN chown -R $UID:$UID  /root/.docker/*
 RUN chmod ug+rwx "$HOME/.docker" -R
 
 RUN mkdir -p "/opt/dagster/app"
-RUN chmod ug+rwx /opt/dagster/**/* -R
-RUN chown -R $UID:$UID  /opt/dagster/**/*
+RUN chmod ug+rwx /opt/dagster/* -R
+RUN chown -R $UID:$UID  /opt/dagster/*
 WORKDIR /opt/dagster/app
 
 ADD src/s3_sample/ .
 COPY setup.py .
-RUN python3 -m pip install --no-cache-dir --upgrade wheel
-RUN python3 -m pip install --no-cache-dir --upgrade setuptools
-RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python -m pip install -e .
 
 USER $USER
