@@ -29,8 +29,9 @@ RUN ln -s /usr/bin/$PYTHON_VERSION /usr/bin/python
 COPY src/Docker/docker-client-config.json /root/.docker/config.json
 RUN chown -R $UID:$UID  /root/.docker/*
 RUN chmod ug+rwx "$HOME/.docker" -R
-RUN chown -R $UID:$UID  /opt/dagster/*
 
+RUN mkdir -p "/opt/dagster/app"
+RUN chown -R $UID:$UID  /opt/dagster/*
 WORKDIR /opt/dagster/app
 
 ADD src/s3_sample/ .
