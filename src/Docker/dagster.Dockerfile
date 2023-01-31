@@ -31,7 +31,8 @@ RUN chown -R $UID:$UID  /root/.docker/*
 RUN chmod ug+rwx "$HOME/.docker" -R
 
 RUN mkdir -p "/opt/dagster/app"
-RUN chown -R $UID:$UID  /opt/dagster/*
+RUN chmod ug+rwx /opt/dagster/**/* -R
+RUN chown -R $UID:$UID  /opt/dagster/**/*
 WORKDIR /opt/dagster/app
 
 ADD src/s3_sample/ .
