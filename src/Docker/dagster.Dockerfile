@@ -29,12 +29,15 @@ RUN ln -s /usr/bin/$PYTHON_VERSION /usr/bin/python
 COPY src/Docker/docker-client-config.json /root/.docker/config.json
 RUN chown -R $UID:$UID  /root/.docker/*
 RUN chmod ug+rwx "$HOME/.docker" -R
+RUN chown -R $UID:$UID  /opt/dagster/*
 
 WORKDIR /opt/dagster/app
-RUN chown -R $UID:$UID  .
 
 ADD src/s3_sample/ .
 COPY setup.py .
+RUN python3 -m pip install --no-cache-dir --upgrade wheel
+RUN python3 -m pip install --no-cache-dir --upgrade setuptools
+RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python -m pip install -e .
 
 USER $USER
