@@ -2,7 +2,7 @@ variables:
   IAM_ROLE_PARAM: /feat300123/dagster/s3-sample/RoleArn
   BUCKET_NAME_PARAM: /feat300123/dagster/s3-sample/BucketName
   DS_TARGET_IMAGE_NAME: dagster-s3-sample
-  CODE_LOCATION_VERSION: 0.0.3
+  CODE_LOCATION_VERSION: custom-image
   DOCKER_SRC_DIR: src/Docker
 
 code-location-deployment:
@@ -31,7 +31,7 @@ code-location-deployment:
     - echo "### Starting Docker build   "
     - echo "############################"
     - echo $HARBOR_USER_PWD | docker login --username $HARBOR_USER --password-stdin $HARBOR_URL/
-    - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION -f $DOCKER_SRC_DIR/Dockerfile . --build-arg s3_bucket_name=$S3_BUCKET --build-arg iam_role_arn=$IAM_ROLE_ARN --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
+    - docker build -t $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION -f $DOCKER_SRC_DIR/dagster.Dockerfile . --build-arg s3_bucket_name=$S3_BUCKET --build-arg iam_role_arn=$IAM_ROLE_ARN --build-arg http_proxy=$PROXY --build-arg https_proxy=$PROXY
     - docker push $HARBOR_SHORT_URL/$HARBOR_PROJECT/$DS_TARGET_IMAGE_NAME:$CODE_LOCATION_VERSION
     - echo "############################"
     - echo "### Finished Docker build   "

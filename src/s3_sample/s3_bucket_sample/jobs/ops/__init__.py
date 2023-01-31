@@ -96,7 +96,7 @@ def upload_dataframe(context, created_dataframe: pd.DataFrame) -> bool:
 
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
-    file_name = f"./{current_time}-df.csv"
+    file_name = f"{current_time}-df.csv"
     csv_buffer = StringIO()
 
     created_dataframe.to_csv(csv_buffer)
