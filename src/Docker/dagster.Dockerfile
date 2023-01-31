@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2
+FROM hdi-registry.we.decodeinsurance.de/mdp-hd/amazonlinux:2
 
 ARG iam_role_arn
 ARG s3_bucket_name
