@@ -5,17 +5,14 @@ from dagster import build_op_context
 from unittest.mock import MagicMock, ANY
 import pytest
 import os
-import boto3
 from botocore.exceptions import ClientError
 
 @pytest.fixture()
 def environment():
     os.environ = {
-        "LOG_LEVEL": "INFO",
         "IAM_ROLE_ARN": "rolearn",
         "S3_BUCKET": "s3bucket",
     }
-
 
 
 class TestS3Sample():
@@ -42,13 +39,14 @@ class TestS3Sample():
 
     def test_build_s3_client(self, environment):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
+        from src.s3_sample.s3_bucket_sample.jobs.ops import build_s3_client as uat
         sts = MagicMock()
         role_arn = os.environ["IAM_ROLE_ARN"]
 
         # When
         response = uat(
-            sts=sts
+            sts=sts,
+            role_arn=role_arn
         )
 
         sts.assume_role.assert_called_with(
@@ -60,8 +58,10 @@ class TestS3Sample():
 
     def test_build_s3_client_client_error(self, environment):
         # Give
-        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
+        from src.s3_sample.s3_bucket_sample.jobs.ops import build_s3_client as uat
         sts = MagicMock()
+        role_arn = os.environ["IAM_ROLE_ARN"]
+
         sts.assume_role.side_effect = ClientError(
             error_response={
                 "Error": {
@@ -75,18 +75,8 @@ class TestS3Sample():
         # When
         with pytest.raises(ClientError):
             uat(
-                sts=sts
-            )
-
-    def test_build_s3_client_key_error(self):
-        # Give
-        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import build_s3_client as uat
-        sts = MagicMock()
-        del(os.environ["IAM_ROLE_ARN"])
-        # When
-        with pytest.raises(KeyError):
-            uat(
-                sts=sts
+                sts=sts,
+                role_arn=role_arn
             )
 
     @mock.patch(
@@ -97,48 +87,13 @@ class TestS3Sample():
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
         bucket_name = os.environ["S3_BUCKET"]
+        role_arn = os.environ["IAM_ROLE_ARN"]
         test_context = build_op_context(
             config={
                 "bucket_name": bucket_name,
+                "role_arn": role_arn,
             }
         )
-
-        df = pd.DataFrame(
-            np.random.randint(
-                0,
-                100,
-                size=(100, 4)
-            ),
-        )
-
-        # When
-        response = uat(
-            created_dataframe=df,
-            s3_client=MagicMock(),
-            context=test_context,
-        )
-
-        # Then
-        s3_mock.Object(bucket_name, f"{bucket_name}/{ANY}").put(Body=ANY)
-        assert response is True
-
-    @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
-        return_value=MagicMock()
-    )
-    def test_upload_dataframe_upload_exception(self, s3_client_mock, environment):
-        # Give
-        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
-        s3_client_mock.put_object.side_effect = ClientError(
-            error_response={
-                "Error": {
-                    "Code": "ParamValidationError",
-                    "Message": "Invalid request exception",
-                }
-            },
-            operation_name="PutObject",
-        )
-
         df = pd.DataFrame(
             np.random.randint(
                 0,
@@ -149,43 +104,20 @@ class TestS3Sample():
         )
 
         # When
-        with pytest.raises(Exception):
-            uat(
-                created_dataframe=df,
-                s3_client=s3_client_mock,
-                bucket_name=os.environ["S3_BUCKET"]
-            )
+        response = uat(
+            context=test_context,
+            created_dataframe=df
+        )
+
+        # Then
+        s3_mock.Object(bucket_name, f"{bucket_name}/{ANY}").put(Body=ANY)
+        assert response is True
 
     @mock.patch(
         "src.s3_sample.s3_bucket_sample.jobs.ops.build_s3_client",
         return_value=MagicMock()
     )
-    def test_upload_dataframe_key_error(self, s3_mock, environment):
-        # Give
-        from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import upload_dataframe as uat
-        del(os.environ["S3_BUCKET"])
-        df = pd.DataFrame(
-            np.random.randint(
-                0,
-                100,
-                size=(100, 4)
-            ),
-        )
-
-        # When
-        with pytest.raises(KeyError):
-            uat(
-                created_dataframe=df,
-                s3_client=MagicMock(),
-                bucket_name=os.environ["S3_BUCKET"]
-            )
-
-
-    @mock.patch(
-        "src.s3_sample.s3_bucket_sample.jobs.ops.upload_dataframe",
-        return_value=True
-    )
-    def test_load_s3(self, mocked_upload_dataframe, environment):
+    def test_load_s3(self, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
 
@@ -200,6 +132,12 @@ class TestS3Sample():
                             "n_rows": 0,
                             "n_cols": 4,
                         }
+                    },
+                    "upload_dataframe": {
+                        "config": {
+                            "bucket_name": os.environ["S3_BUCKET"],
+                            "role_arn": os.environ["IAM_ROLE_ARN"],
+                        }
                     }
                 }
             }
@@ -212,7 +150,7 @@ class TestS3Sample():
         "src.s3_sample.s3_bucket_sample.jobs.ops.upload_dataframe",
         return_value=Exception
     )
-    def test_load_s3_exception(self, mocked_upload_dataframe):
+    def test_load_s3_exception(self, mocked_upload_dataframe, environment):
         # Give
         from src.s3_sample.s3_bucket_sample.jobs.load_s3_job import load_s3 as uat
 
@@ -227,6 +165,11 @@ class TestS3Sample():
                                 "random_max_size": 100,
                                 "n_rows": 0,
                                 "n_cols": 4,
+                            }
+                        },
+                        "upload_dataframe": {
+                            "config": {
+                                "bucket_name": os.environ["S3_BUCKET"],
                             }
                         }
                     }

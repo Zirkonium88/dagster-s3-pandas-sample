@@ -3,7 +3,7 @@ import os
 import boto3
 from io import StringIO
 import pandas as pd
-from dagster import op, Field, Int, String
+from dagster import op, Field, Int, String, Out, In
 import logging
 import time
 from botocore.exceptions import ClientError
@@ -11,18 +11,13 @@ from botocore.exceptions import ClientError
 sts = boto3.client("sts")
 
 
-def build_s3_client(sts) -> boto3.client:
+def build_s3_client(sts, role_arn) -> boto3.client:
     """Create a S3 boto3 resource object.
     Args:
         sts: sts boto3 client
     Returns: s3_client, boto3.client object for S3
 
     """
-    try:
-        role_arn = os.environ["IAM_ROLE_ARN"]
-    except KeyError as e:
-        logging.exception(e)
-        raise
     try:
         response = sts.assume_role(
             RoleArn=role_arn,
@@ -46,18 +41,23 @@ def build_s3_client(sts) -> boto3.client:
 
 
 @op(
+    description="""
+        Dieser Op-Schrit zerugt anhand von Inputparametern (random_min_size: kleinste Zahl, random_max_size: größte 
+        Zahl, n_rows: Anzahl der Reihen im pd.Dataframe, n_cols: Anzahl der Spalte im pd.Dataframe) ein pd.Dataframe.
+    """,
     config_schema={
         "random_min_size": Field(Int, is_required=True),
         "random_max_size": Field(Int, is_required=True),
         "n_rows": Field(Int, is_required=True),
         "n_cols": Field(Int, is_required=True),
-    }
+    },
+    out={"created_dataframe": Out()}
 )
 def create_dataframe(context) -> pd.DataFrame:
     """Create a pd.DataFrame with random values.
 
     Args:
-        context:
+        context: dict, Dagster context object
 
     Return: df, pd.DataFrame holding the random values
 
@@ -73,17 +73,19 @@ def create_dataframe(context) -> pd.DataFrame:
 
 
 @op(
+    description="Dieser Op-Schrit lädt das erzeugte pd.DataFrame mittels einer Rolle nach S3 (build_s3_client)",
     config_schema={
         "bucket_name": Field(String, is_required=True),
-    }
+        "role_arn": Field(String, is_required=True),
+    },
+    ins={"created_dataframe": In()}
 )
-def upload_dataframe(context, created_dataframe, s3_client) -> bool:
+def upload_dataframe(context, created_dataframe) -> bool:
     """Upload a pd.DataFrame as CSV to S3.
 
     Args:
-        bucket_name: str, S3 Bucket name
-        created_dataframe: function, to create a pd.DataFrame,
-        s3_client: s3 boto client
+        context: dict, Dagster context object
+        created_dataframe: pd.DataFrame to upload, pd.DataFrame created by create_dataframe(),
 
     Returns: True, if succeeded
     """
@@ -92,9 +94,11 @@ def upload_dataframe(context, created_dataframe, s3_client) -> bool:
     current_time = time.strftime("%H:%M:%S", t)
     file_name = f"./{current_time}-df.csv"
     csv_buffer = StringIO()
+
     created_dataframe.to_csv(csv_buffer)
     bucket_name = context.op_config["bucket_name"]
-
+    role_arn = context.op_config["role_arn"]
+    s3_client = build_s3_client(sts=sts, role_arn=role_arn)
     try:
         logging.info(f"Uploading file {file_name} to S3 bucket {bucket_name}")
         s3_client.put_object(Bucket=bucket_name, Body=csv_buffer.getvalue(), Key=f"s3://{bucket_name}/{file_name}")
