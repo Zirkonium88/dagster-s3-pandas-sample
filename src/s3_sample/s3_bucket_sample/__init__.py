@@ -1,2 +1,2 @@
 from .definitions import defs
-import repository
+from .repository import s3_sample_repository
