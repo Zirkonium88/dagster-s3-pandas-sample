@@ -6,7 +6,8 @@ venv
 .venv
 env
 *.egg-info
-
+*.iml
+*.xml
 # CDK asset staging directory
 .cdk.staging
 cdk.out
@@ -17,3 +18,4 @@ synth
 
 initialise.py
 README_SAMPLE_REPO.md
+.coverage

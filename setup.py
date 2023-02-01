@@ -6,16 +6,11 @@ if __name__ == "__main__":
         packages=find_packages(exclude=["sample_s3_tests"]),
         package_data={"sample_s3": ["sample_s3/*"]},
         install_requires=[
-            "pip>=21.1",
-            "setuptools>=65.5.1",
-            "wheel>=0.38.1",
             "dagster",
             "pandas",
             "numpy",
             "s3fs",
-            "dagster-aws",
             "dagster-cloud",
-            "dagstermill",
         ],
-        extras_require={"dev": ["dagit", "pytest"]},
+        extras_require={"dev": ["pytest"]},
     )

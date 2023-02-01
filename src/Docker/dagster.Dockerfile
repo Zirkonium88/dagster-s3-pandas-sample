@@ -13,17 +13,16 @@ ENV S3_BUCKET=${s3_bucket_name}
 ENV PATH=$PATH:/home/$USER/.local/bin
 
 RUN amazon-linux-extras enable $PYTHON_VERSION &&\
-    yum install -y $PYTHON_VERSION \
-    python-pip3 \
-    default-jre \
-    git && \
+    yum install -y $PYTHON_VERSION  \
+    python3-pip \
+    shadow-utils && \
     yum update -y && \
     yum upgrade -y && \
-    useradd --create-home --shell /bin/bash --gid "${GID}" --uid ${UID} ${USER} && \
     yum clean all
 
+RUN useradd --create-home --shell /bin/bash --gid "${GID}" --uid ${UID} ${USER}
+
 RUN rm /usr/bin/python
-RUN ln -s /usr/bin/$PYTHON_VERSION /usr/bin/python3
 RUN ln -s /usr/bin/$PYTHON_VERSION /usr/bin/python
 
 COPY src/Docker/docker-client-config.json /root/.docker/config.json
@@ -37,7 +36,7 @@ WORKDIR /opt/dagster/app
 
 ADD src/s3_sample/ .
 COPY setup.py .
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN python3 -m pip install -e .
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
 USER $USER
