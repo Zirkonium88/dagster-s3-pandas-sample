@@ -21,7 +21,7 @@ def build_s3_client() -> boto3.client:
 
 
 @op(
-    description="These Op creates a pd.Dataframe based on parameters.",
+    description="This Op creates a pd.Dataframe based on parameters.",
     config_schema={
         "random_min_size": Field(Int, is_required=True),
         "random_max_size": Field(Int, is_required=True),

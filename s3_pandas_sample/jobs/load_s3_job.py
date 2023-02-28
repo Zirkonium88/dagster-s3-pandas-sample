@@ -8,7 +8,7 @@ from .ops import (
 
 @job(
     description="""
-        Dieser Job (load_s3()) conbtains to Op steps. First a pd.DataFrame will be created and afterwrads this one will
+        This Job (load_s3()) contains to Op steps. First a pd.DataFrame will be created and afterwards this one will
         be uploaded to a S3 Bucket.
     """,
     config={
