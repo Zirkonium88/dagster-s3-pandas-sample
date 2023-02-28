@@ -1,9 +1,0 @@
-locations:
-  - location_name: s3_bucket_sample
-    code_source:
-      package_name: s3_bucket_sample
-    container_context:
-      ecs:
-        env_vars:
-          - LOG_LEVEL=INFO
-    image: hdi-registry.we.decodeinsurance.de/mdp-hd/dagster-s3-sample:0.0.3

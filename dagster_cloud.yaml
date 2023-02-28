@@ -1,0 +1,8 @@
+locations:
+  - location_name: s3_pandas_sample
+    code_source:
+      package_name: s3_pandas_sample
+    container_context:
+      ecs:
+        task_role_arn: arn:aws:iam::123456789012:role/MyECSTaskRole
+    image: REGISTRY_URI/dagster-s3-sample:latest

@@ -1,4 +1,0 @@
-[submodule "cicd"]
-	path = cicd
-	url = ../cicd
-	branch = release/2.4.0

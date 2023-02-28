@@ -1,0 +1,11 @@
+{
+  "proxies":
+  {
+    "default":
+    {
+      "httpProxy": "YOUR_HTTP_PROXY",
+      "httpsProxy": "YOUR_HTTPS_PROXY",
+      "noProxy": "YOUR_NO_PROXY"
+    }
+  }
+}
